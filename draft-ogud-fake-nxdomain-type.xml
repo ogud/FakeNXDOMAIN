@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="US-ASCII"?>
+
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd" [
+  <!ENTITY rfc1035 PUBLIC "" "./reference.RFC.1035.xml">
+  <!ENTITY rfc1995 PUBLIC "" "./reference.RFC.1995.xml">
+  <!ENTITY rfc2119 PUBLIC "" "./reference.RFC.2119.xml">
+  <!ENTITY rfc3833 PUBLIC "" "./reference.RFC.3833.xml">
+  <!ENTITY rfc4034 PUBLIC "" "./reference.RFC.4034.xml">
+  <!ENTITY rfc4035 PUBLIC "" "./reference.RFC.4035.xml">
+  <!ENTITY rfc4471 PUBLIC "" "./reference.RFC.4471.xml">
+]>
+
+<rfc category="std" docName="draft-ogud-fake-nxdomain-type-00" 
+     ipr="trust200902" updates="1035">
+
+  <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
+
+  <?rfc toc="yes" ?>
+  <?rfc symrefs="yes" ?>
+  <?rfc sortrefs="yes"?>
+  <?rfc iprnotified="no" ?>
+  <?rfc strict="yes"?>
+  <?rfc compact="yes" ?>
+
+  <front>
+    <title abbrev="NXDOMAIN via NSEC type map">
+      Signaling that NSEC record owner name does not exist
+    </title>
+     
+    <author fullname="Olafur Gudmundsson" initials="O." surname="Gudmundsson">
+      <organization>CloudFlare Inc.</organization>
+      <address>
+        <postal>
+          <street></street>
+          <city>San Francisco</city>
+          <region>CA</region>
+          <code>94107</code>
+          <country>USA</country>
+        </postal>
+        <email>olafur@cloudflare.com</email>
+      </address>
+    </author>
+
+    <author fullname="Filippo Valsorda" initials="F." surname="Valsorda">
+      <organization>CloudFlare Inc.</organization>
+      <address>
+        <postal>
+          <street></street>
+          <city>London</city>
+          <region></region>
+          <code></code>
+          <country>UK</country>
+        </postal>
+        <email>marek@cloudflare.com</email>
+      </address>
+    </author>
+
+    <date />
+      
+    <area>Operations</area>
+      
+    <workgroup>DNSOP</workgroup>
+      
+    <abstract>
+      <t> DNSSEC was to large extent designed for off-line signing. A
+	number of opertunites open up when on-line signing is used. In
+	this case there is no real need for wildcard proof as the
+	server can just say name does not exist. There are some
+	applications that want to know if the name does not exist. 
+	This document creates a new DNS RRtype that can be used to
+	signal non-existence of NSEC/NSEC3 record owner names. 
+      </t> 
+    </abstract>
+  </front>
+
+  <middle>
+    <section title="Introduction"> 
+      <t> The <xref target="RFC4035"> DNSSEC Specification</xref> is
+	  largely designed for <xref target="RFC4471">off-line signing</xref> with minimal thougth
+	  for as how on-line signing systems can give out
+	  smaller/better answers. One way to give a validatable answer
+	  for a question is to say name exists but the type does not. 
+	  This works great for resolvers as they see what was asked for
+	  does not exist thus they tell the application that. 
+	</t> 
+      <t> There is a a sub-class of applicaitons that mostly care if
+	the name exists rather than the type, the question asked was
+	to check for the existence of the name not the type.
+      </t> 
+
+      <t>To support both of the above behaviors we propose to define a
+	a RRtype that has no body and never exists. When the the bit
+	for this type is set the applicaiton can take that to mean
+	"the right RCODE for this question was NXDOMAIN".
+	</t> 
+
+    </section>
+
+    <section title="Requirements Notation">
+      <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL",
+	"SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY",
+	and "OPTIONAL" in this document are to be interpreted as
+	described in <xref target="RFC2119"/>.</t>
+    </section>
+
+    <section title="Protocol Changes">
+      <t> This document specifies a special DNS RR
+      Type<xref target="RFC1035"/> that can only appear in
+      NSEC/NSEC3<xref target="RFC4034"/> to signal: 
+    <list style="bullets"> 
+      <t> this is an on-line signed answer </t>
+      <t> and none of the owner name nor the target name or any
+      name in between them exists.   </t> 
+      <t> this name is not covered by any wild card</t>
+    </list>
+    The purpose of this is to signal that the "right answer" was
+      RCODE=3 and multiple NSEC/NSEC3 recods in authority section, but
+      because the answer was signed on-the-fly we can pretend the
+      query name exists but type does not, thus answerign with RCODE=0
+      and one NSEC record in the authority section. 
+      We call this RRType FakeNXDOMAIN or FDOM, type code is TBD. 
+     </t> 
+	
+      <t>An authoritative DNS server should not be exteneded to load
+        this type. 
+      </t>
+      <t>A resolver can translate the returned NSEC record in a
+      RCODE=3 answer if it so chooses, to clients that do not ask for
+      DNSSEC answers. 
+      </t> 
+    </section>
+
+    <section title="IANA Considerations">
+      <t>We request an assignement in the "Domain Name System (DNS)
+      Parameters" registry sub-registry "Resource Record (RR) TYPEs" for a
+      type code FDOM (Fake DOMain name) suggesting reusing one of the never
+      implememented type like SINK, NIMROD
+      </t>
+    </section>
+
+    <section title="Security Considerations">
+      <t> TBD. makes answers smaller, enables lying and telling the
+      truth at the same time. 
+      </t> 
+    </section>
+
+    <section title="Implementation Experience"> 
+      <t>TBD</t>
+    </section> 
+
+    <section title="Acknowledgements">
+      <t> Editors want to thank following people, in random order, for
+	useful feedback: 
+
+      </t>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      &rfc1035;
+      &rfc2119;
+      &rfc4034;
+      &rfc4035;
+    </references>
+
+    <references title="Informative References">
+      &rfc4471;
+    </references>
+
+    <section title="Document history"> 
+      <t>This section (and sub-sections) should be removed before
+        publication.</t>
+
+      <section title="Abridged Revision History">
+        <t>Initial draft.</t>
+      </section>
+   </section>
+  </back>
+</rfc>
