@@ -51,7 +51,7 @@
           <code></code>
           <country>UK</country>
         </postal>
-        <email>marek@cloudflare.com</email>
+        <email>filippo@cloudflare.com</email>
       </address>
     </author>
 
@@ -63,12 +63,14 @@
       
     <abstract>
       <t> DNSSEC was to large extent designed for off-line signing. A
-	number of opertunites open up when on-line signing is used. In
+	number of new opertunites become possible when on-line signing is used. In
 	this case there is no real need for wildcard proof as the
-	server can just say name does not exist. There are some
-	applications that want to know if the name does not exist. 
+	server can just say queried name and type does not exist in a single
+	NSEC/NSEC3 record. A minnimaly covering NSEC record that
+	shares name with query name can not set the NXDOMAIN rcode,
+	some applications want to explicitly know if the name does exist. 
 	This document creates a new DNS RRtype that can be used to
-	signal non-existence of NSEC/NSEC3 record owner names. 
+	signal non-existence of the names used in NSEC/NSEC3 records. 
       </t> 
     </abstract>
   </front>
@@ -85,11 +87,12 @@
 	</t> 
       <t> There is a a sub-class of applicaitons that mostly care if
 	the name exists rather than the type, the question asked was
-	to check for the existence of the name not the type.
+	to check for the existence of the name not the type. The above
+	approach makes live hard for these applications.
       </t> 
 
-      <t>To support both of the above behaviors we propose to define a
-	a RRtype that has no body and never exists. When the the bit
+      <t>To support both of the above expectations we propose to define a
+	a RRtype that has no body and never exists (i.e. meta-type). When the the bit
 	for this type is set the applicaiton can take that to mean
 	"the right RCODE for this question was NXDOMAIN".
 	</t> 
@@ -113,7 +116,7 @@
       name in between them exists.   </t> 
       <t> this name is not covered by any wild card</t>
     </list>
-    The purpose of this is to signal that the "right answer" was
+    The purpose of this is to signal that the "right rcode for answer" was
       RCODE=3 and multiple NSEC/NSEC3 recods in authority section, but
       because the answer was signed on-the-fly we can pretend the
       query name exists but type does not, thus answerign with RCODE=0
@@ -122,10 +125,10 @@
      </t> 
 	
       <t>An authoritative DNS server should not be exteneded to load
-        this type. 
+      this type or any other meta type. 
       </t>
-      <t>A resolver can translate the returned NSEC record in a
-      RCODE=3 answer if it so chooses, to clients that do not ask for
+      <t>A resolver MAY translate the returned NSEC record in a
+      RCODE=3 answer, if it so chooses, to clients that do not ask for
       DNSSEC answers. 
       </t> 
     </section>
@@ -133,15 +136,17 @@
     <section title="IANA Considerations">
       <t>We request an assignement in the "Domain Name System (DNS)
       Parameters" registry sub-registry "Resource Record (RR) TYPEs" for a
-      type code FDOM (Fake DOMain name) suggesting reusing one of the never
-      implememented type like SINK, NIMROD
+      type code FDOM (Fake DOMain name) suggesting using the lowest
+      Meta-Type code available 128. 
       </t>
     </section>
 
     <section title="Security Considerations">
-      <t> TBD. makes answers smaller, enables lying and telling the
-      truth at the same time. 
-      </t> 
+      <t> On-line signing of negative answers can make answers
+      smaller by only returning one NSEC record. This proposal enables
+      "lying" with in spec, and telling the truth at the same time. 
+      </t>
+      <t> more TDB </t>
     </section>
 
     <section title="Implementation Experience"> 
