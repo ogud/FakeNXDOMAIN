@@ -21,9 +21,9 @@ Abstract
    a single NSEC/NSEC3 record.  But such a minimally covering NSEC
    record that shares the name with the query name can not set the
    NXDOMAIN RCODE.  Still, some applications want to explicitly know if
-   the name does exist.  This document creates a new DNS RRtype number
-   that can be used to signal nonexistence of the owner names of NSEC/
-   NSEC3 records.
+   the name does exist.  This document allocates a new DNS RRtype that
+   can be used to signal nonexistence of the owner names of NSEC/NSEC3
+   records.
 
 Status of This Memo
 
@@ -50,6 +50,14 @@ Copyright Notice
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
    (http://trustee.ietf.org/license-info) in effect on the date of
+
+
+
+Gudmundsson & Valsorda  Expires November 8, 2015                [Page 1]
+
+Internet-Draft         NXDOMAIN via NSEC type map               May 2015
+
+
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -59,19 +67,18 @@ Copyright Notice
 
 Table of Contents
 
-   1.  Introduction
-   2.  Requirements Notation
-   3.  Protocol Changes
-   4.  IANA Considerations
-   5.  Security Considerations
-   6.  Implementation Experience
-   7.  Acknowledgements
-   8.  References
-     8.1.  Normative References
-     8.2.  Informative References
-   Appendix A.  Document history
-     A.1.  Abridged Revision History
-   Authors' Addresses
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  Requirements Notation . . . . . . . . . . . . . . . . . . . .   3
+   3.  Protocol Changes  . . . . . . . . . . . . . . . . . . . . . .   3
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   3
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .   3
+   6.  Implementation Experience . . . . . . . . . . . . . . . . . .   4
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .   4
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .   4
+   Appendix A.  Document history . . . . . . . . . . . . . . . . . .   4
+     A.1.  Abridged Revision History . . . . . . . . . . . . . . . .   4
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   4
 
 1.  Introduction
 
@@ -90,11 +97,22 @@ Table of Contents
    existence of the name and not the type.  The above approach makes
    life hard for these applications.
 
-   To support both of the above expectations we propose to define a a
-   RRtype that has no body and never exists (i.e. a meta-type).  When
+   To support both of the above expectations we propose to define a
+   RRtype, that has no body and never exists (i.e. a meta-type).  When
    the bit for this type is set in the NSEC/NSEC3 bitmap the application
    can take that to mean "the right RCODE for this answer would be
    NXDOMAIN".
+
+
+
+
+
+
+
+Gudmundsson & Valsorda  Expires November 8, 2015                [Page 2]
+
+Internet-Draft         NXDOMAIN via NSEC type map               May 2015
+
 
 2.  Requirements Notation
 
@@ -121,7 +139,7 @@ Table of Contents
    answering with RCODE=0 and one NSEC record in the authority section.
    We call this RRType FakeNXDOMAIN or FDOM, type code is TBD.
 
-   An authoritative DNS server should not be extended to load this type
+   An authoritative DNS server SHOULD NOT be extended to load this type
    or any other meta type.
 
    A resolver MAY translate the returned NSEC record in a RCODE=3
@@ -143,6 +161,15 @@ Table of Contents
 
    An application sensible to the difference between a nonexistent name
    and a nonexistent type SHOULD support the RRType defined in this
+
+
+
+
+Gudmundsson & Valsorda  Expires November 8, 2015                [Page 3]
+
+Internet-Draft         NXDOMAIN via NSEC type map               May 2015
+
+
    document, and can rely on it to retrieve the information they look
    for securely since the NSEC/NSEC3 bitmap is signed.
 
@@ -150,14 +177,9 @@ Table of Contents
 
    TBD
 
-7.  Acknowledgements
+7.  References
 
-   Editors want to thank following people, in random order, for useful
-   feedback:
-
-8.  References
-
-8.1.  Normative References
+7.1.  Normative References
 
    [RFC1035]  Mockapetris, P., "Domain names - implementation and
               specification", STD 13, RFC 1035, November 1987.
@@ -173,7 +195,7 @@ Table of Contents
               Rose, "Protocol Modifications for the DNS Security
               Extensions", RFC 4035, March 2005.
 
-8.2.  Informative References
+7.2.  Informative References
 
    [RFC4471]  Sisson, G. and B. Laurie, "Derivation of DNS Name
               Predecessor and Successor", RFC 4471, September 2006.
@@ -184,7 +206,7 @@ Appendix A.  Document history
 
 A.1.  Abridged Revision History
 
-   Initial draft.
+   00 Initial draft.
 
 Authors' Addresses
 
@@ -196,6 +218,14 @@ Authors' Addresses
    Email: olafur@cloudflare.com
 
 
+
+
+
+Gudmundsson & Valsorda  Expires November 8, 2015                [Page 4]
+
+Internet-Draft         NXDOMAIN via NSEC type map               May 2015
+
+
    Filippo Valsorda
    CloudFlare Inc.
    London
@@ -203,3 +233,48 @@ Authors' Addresses
 
    Email: filippo@cloudflare.com
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Gudmundsson & Valsorda  Expires November 8, 2015                [Page 5]

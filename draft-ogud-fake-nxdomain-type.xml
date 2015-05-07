@@ -69,7 +69,7 @@
 	NSEC/NSEC3 record. But such a minimally covering NSEC record that
 	shares the name with the query name can not set the NXDOMAIN RCODE.
 	Still, some applications want to explicitly know if the name does exist.
-	This document creates a new DNS RRtype number that can be used to
+	This document allocates a new DNS RRtype that can be used to
 	signal nonexistence of the owner names of NSEC/NSEC3 records.
       </t> 
     </abstract>
@@ -94,8 +94,8 @@
 	approach makes life hard for these applications.
       </t> 
 
-      <t>To support both of the above expectations we propose to define a
-	a RRtype that has no body and never exists (i.e. a meta-type). When the
+      <t>To support both of the above expectations we propose to
+	define a RRtype, that has no body and never exists (i.e. a meta-type). When the
         bit for this type is set in the NSEC/NSEC3 bitmap the application can
         take that to mean "the right RCODE for this answer would be NXDOMAIN".
 	</t> 
@@ -116,7 +116,7 @@
     <list style="bullets"> 
       <t> this is an on-line signed answer </t>
       <t> none of the owner name nor the target name or any
-      name in between them exist   </t>
+      name in between them exist </t>
       <t> this name is not covered by any wildcard</t>
     </list>
     The purpose of this is to signal that the "right answer" for this query was
@@ -127,7 +127,7 @@
       We call this RRType FakeNXDOMAIN or FDOM, type code is TBD. 
      </t> 
 	
-      <t>An authoritative DNS server should not be extended to load
+      <t>An authoritative DNS server SHOULD NOT be extended to load
       this type or any other meta type. 
       </t>
       <t>A resolver MAY translate the returned NSEC record in a
@@ -159,13 +159,14 @@
     <section title="Implementation Experience"> 
       <t>TBD</t>
     </section> 
-
+<!--
     <section title="Acknowledgements">
       <t> Editors want to thank following people, in random order, for
 	useful feedback: 
 
       </t>
     </section>
+--> 
   </middle>
 
   <back>
@@ -180,12 +181,13 @@
       &rfc4471;
     </references>
 
+
     <section title="Document history"> 
       <t>This section (and sub-sections) should be removed before
         publication.</t>
 
       <section title="Abridged Revision History">
-        <t>Initial draft.</t>
+        <t> 00 Initial draft.</t>
       </section>
    </section>
   </back>
