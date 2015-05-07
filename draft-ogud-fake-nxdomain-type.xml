@@ -24,7 +24,7 @@
 
   <front>
     <title abbrev="NXDOMAIN via NSEC type map">
-      Signaling that NSEC record owner name does not exist
+      Signaling NSEC record owner name nonexistence
     </title>
      
     <author fullname="Olafur Gudmundsson" initials="O." surname="Gudmundsson">
@@ -63,38 +63,41 @@
       
     <abstract>
       <t> DNSSEC was to large extent designed for off-line signing. A
-	number of new opertunites become possible when on-line signing is used. In
-	this case there is no real need for wildcard proof as the
-	server can just say queried name and type does not exist in a single
-	NSEC/NSEC3 record. A minnimaly covering NSEC record that
-	shares name with query name can not set the NXDOMAIN rcode,
-	some applications want to explicitly know if the name does exist. 
-	This document creates a new DNS RRtype that can be used to
-	signal non-existence of the names used in NSEC/NSEC3 records. 
+	number of new opportunities arise when on-line signing is used. In
+	negative answers case there is no real need for the wildcard proof and the
+	server can just state that the queried name and type do not exist in a single
+	NSEC/NSEC3 record. But such a minimally covering NSEC record that
+	shares the name with the query name can not set the NXDOMAIN RCODE.
+	Still, some applications want to explicitly know if the name does exist.
+	This document creates a new DNS RRtype number that can be used to
+	signal nonexistence of the owner names of NSEC/NSEC3 records.
       </t> 
     </abstract>
   </front>
 
   <middle>
     <section title="Introduction"> 
-      <t> The <xref target="RFC4035"> DNSSEC Specification</xref> is
-	  largely designed for <xref target="RFC4471">off-line signing</xref> with minimal thougth
-	  for as how on-line signing systems can give out
-	  smaller/better answers. One way to give a validatable answer
-	  for a question is to say name exists but the type does not. 
-	  This works great for resolvers as they see what was asked for
-	  does not exist thus they tell the application that. 
-	</t> 
-      <t> There is a a sub-class of applicaitons that mostly care if
-	the name exists rather than the type, the question asked was
-	to check for the existence of the name not the type. The above
-	approach makes live hard for these applications.
+      <t>The <xref target="RFC4035">DNSSEC Specification</xref> is
+	  largely designed for <xref target="RFC4471">off-line signing</xref> with
+	  minimal thought for as how on-line signing systems can give out
+	  smaller/better answers.
+      </t>
+      <t>One way to give a validate-able negative answer for a question when
+	  the name does not exist is to state that the name exists but the type
+          does not. This allows to generate one NSEC instead of two.
+	  This works great for resolvers as they see that what was asked for
+	  does not exist and thus tell the application that.
+      </t>
+      <t> There is a sub-class of applications that care if
+	the name exists rather than the type and the question is asked
+	to check for the existence of the name and not the type. The above
+	approach makes life hard for these applications.
       </t> 
 
       <t>To support both of the above expectations we propose to define a
-	a RRtype that has no body and never exists (i.e. meta-type). When the the bit
-	for this type is set the applicaiton can take that to mean
-	"the right RCODE for this question was NXDOMAIN".
+	a RRtype that has no body and never exists (i.e. a meta-type). When the
+        bit for this type is set in the NSEC/NSEC3 bitmap the application can
+        take that to mean "the right RCODE for this answer would be NXDOMAIN".
 	</t> 
 
     </section>
@@ -107,24 +110,24 @@
     </section>
 
     <section title="Protocol Changes">
-      <t> This document specifies a special DNS RR
-      Type<xref target="RFC1035"/> that can only appear in
-      NSEC/NSEC3<xref target="RFC4034"/> to signal: 
+      <t> This document specifies a special DNS RRType <xref target="RFC1035"/>
+      that can only appear in NSEC/NSEC3 bitmaps <xref target="RFC4034"/>
+      to signal that:
     <list style="bullets"> 
       <t> this is an on-line signed answer </t>
-      <t> and none of the owner name nor the target name or any
-      name in between them exists.   </t> 
-      <t> this name is not covered by any wild card</t>
+      <t> none of the owner name nor the target name or any
+      name in between them exist   </t>
+      <t> this name is not covered by any wildcard</t>
     </list>
-    The purpose of this is to signal that the "right rcode for answer" was
-      RCODE=3 and multiple NSEC/NSEC3 recods in authority section, but
-      because the answer was signed on-the-fly we can pretend the
-      query name exists but type does not, thus answerign with RCODE=0
+    The purpose of this is to signal that the "right answer" for this query was
+      RCODE=3 and multiple NSEC/NSEC3 records in the authority section, but
+      because the answer was signed on-the-fly it was pretended that the
+      query name exists but the type does not, thus answering with RCODE=0
       and one NSEC record in the authority section. 
       We call this RRType FakeNXDOMAIN or FDOM, type code is TBD. 
      </t> 
 	
-      <t>An authoritative DNS server should not be exteneded to load
+      <t>An authoritative DNS server should not be extended to load
       this type or any other meta type. 
       </t>
       <t>A resolver MAY translate the returned NSEC record in a
@@ -134,7 +137,7 @@
     </section>
 
     <section title="IANA Considerations">
-      <t>We request an assignement in the "Domain Name System (DNS)
+      <t>We request an assignment in the "Domain Name System (DNS)
       Parameters" registry sub-registry "Resource Record (RR) TYPEs" for a
       type code FDOM (Fake DOMain name) suggesting using the lowest
       Meta-Type code available 128. 
@@ -142,11 +145,15 @@
     </section>
 
     <section title="Security Considerations">
-      <t> On-line signing of negative answers can make answers
-      smaller by only returning one NSEC record. This proposal enables
-      "lying" with in spec, and telling the truth at the same time. 
+      <t>While the content of the answer changes with this technique, its actual
+        meaning is the same and such an answer can't be replayed by an attacker
+        to mean anything else than its intended meaning.
       </t>
-      <t> more TDB </t>
+      <t>An application sensible to the difference between a nonexistent name and
+        a nonexistent type SHOULD support the RRType defined in this document,
+        and can rely on it to retrieve the information they look for securely
+        since the NSEC/NSEC3 bitmap is signed.
+      </t>
     </section>
 
     <section title="Implementation Experience"> 
